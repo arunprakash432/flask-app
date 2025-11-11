@@ -54,7 +54,7 @@ PY
 
     stage('Deploy to EC2') {
       steps {
-        sshagent(credentials: ['ec2-ssh-key']) {
+        sshagent(credentials: ['ec2-ssh-key-1']) {
           withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
             sh """
               set -eu
