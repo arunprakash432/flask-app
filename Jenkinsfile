@@ -21,7 +21,7 @@ pipeline {
     stage('Unit tests') {
       steps {
         sh '''
-          set -euxo pipefail
+          set -eu
           python3 -m venv venv
           . venv/bin/activate
           pip install -r requirements.txt
@@ -43,11 +43,11 @@ PY
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
           sh '''
-            set -euxo pipefail
+            set -eu
             echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-            docker push '"${DOCKERHUB_REPO}:${IMAGE_TAG}"'
-            docker push '"${DOCKERHUB_REPO}:latest"'
           '''
+          sh "docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}"
+          sh "docker push ${DOCKERHUB_REPO}:latest"
         }
       }
     }
@@ -57,7 +57,7 @@ PY
         sshagent(credentials: ['ec2-ssh-key']) {
           withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
             sh """
-              set -euxo pipefail
+              set -eu
               ssh -o StrictHostKeyChecking=no ${EC2_SSH_USER}@${EC2_HOST} 'bash -lc "
                 set -e
                 echo \\"$DH_PASS\\" | sudo docker login -u \\"$DH_USER\\" --password-stdin
